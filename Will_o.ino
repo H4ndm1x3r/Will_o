@@ -28,10 +28,21 @@ void loop() {
   micValue = analogRead(micPin);
 // Aggressive blinking
   if (micValue  < micThresh) {
-    for (int p = 0; p < ledCount; p++) { // For loop to randomize the LED thingies
+    int passedTime = millis();
+    int passedThresh = 200;
+    for (int p = 0; p < 50000; p++) { // For loop to randomize the LED thingies
       int pinNum = random(0,15);
-      ledState[pinNum] = !ledState[pinNum]
-      digitalWrite(ledPin[pinNum], ledState[pinNum]);
+      if (passedTime == passedThresh) {
+        if (ledState[pinNum] == HIGH) {
+          ledState[pinNum] = LOW;
+        }
+        else {
+          ledState[pinNum] = HIGH;
+        }
+        digitalWrite(ledPin[pinNum], ledState[pinNum]);
+        passedThresh = passedThresh + 200;
+      }
+      
     }
     ledOn = !ledOn;
     // Timeout to avoid high speeds
