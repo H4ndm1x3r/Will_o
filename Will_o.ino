@@ -1,6 +1,5 @@
 // Software for the Will-o-Wisp concept.
 // Created in collaboration with Digital Experience & Aesthetics.
-// Code by Nicholas Krasuski, BSc Digital Media and Design
 
 // Values used for output/LED addressing
 int ledPin[15] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 46, 45, 44}; // Add PWM pins
