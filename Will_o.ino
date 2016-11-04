@@ -4,10 +4,9 @@
 // Values used for output/LED addressing
 int ledPin[15] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 46, 45, 44}; // Add PWM pins
 int ledState[15] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW}; // Reserved led state
+int ledFade[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // List of fade values
 int ledCount = 15; // The amount of LEDs
 int ledOn = false;
-int bright = 0; // Reserved brightness value
-int fade = 0; // Reserved fade value
 
 // Microphone/input values
 int micPin = A0; // Pin used for analog microphone input
@@ -58,24 +57,31 @@ void loop() {
     if (ledOn == true) { // Detect if Aggressive Blinking program has run
       for (int o = 0; 0 < ledCount; o++) { // Turn off all LEDs for fresh start
       digitalWrite(ledPin[o], LOW);
+      ledFade[o] = 0;
       }
     }
-
-    
-     
-    // Group LEDs possibly
-    analogWrite(ledPin[x], brightness); // Add array numbers when known
-    // Continue analogWrite for applicable amount
-    bright = bright + fade;
-    if (bright <= 0 || bright >= 255) {
-      fade = -fade;
+    for (int q = 0; p < 100000; q++) { // For-loop to increase/decrease fade amount on LEDs
+      int pinNum = random(0,15); // Choose a random pin
+      if (ledFade[pinNum] == 0) { // if-statement to increase brightness level
+        for (int fade = 0; fade <= 255; fade += 5) {
+          analogWrite(ledPin[pinNum],fade);
+          if (fade == 255) {
+            ledFade[pinNum] = fade;
+          }
+          delay(30); // Delay to visualize the fade effect
+        }
+      }
+      if (ledFade[pinNum] > 0) { // if-statement to decrease brightness level
+        for (int fade = 255; fade >= 0; -= 5) {
+          analogWrite(ledPin[pinNum], fade);
+          if (fade == 0) {
+            ledFade[pinNum] = fade;
+          }
+          delay(30); // Delay to visualize the fade effect
+        }
+      }
     }
-    delay(30);
   }
-  
-// Randomly chosen (timebased or number generation)
-
 // A 20 or so second sleep while selected program runs
-
 }
 
