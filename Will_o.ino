@@ -25,36 +25,44 @@ void setup() {
 }
 
 void loop() {
-  micValue = analogRead(micPin);
+  micValue = analogRead(micPin); //Read the analog value from the microphone
 // Aggressive blinking
   if (micValue  < micThresh) {
-    int passedTime = millis();
-    int passedThresh = 200;
+    int passedTime = millis(); // Start a millisecond timer to slow down sequence a bit
+    int passedThresh = 200; // Initial threshold for time passed
     for (int p = 0; p < 50000; p++) { // For loop to randomize the LED thingies
       int pinNum = random(0,15);
-      if (passedTime == passedThresh) {
-        if (ledState[pinNum] == HIGH) {
+      if (passedTime == passedThresh) { // Check if threshold milliseconds has been reached
+        if (ledState[pinNum] == HIGH) { // detect prior state in order to reverse
           ledState[pinNum] = LOW;
         }
         else {
           ledState[pinNum] = HIGH;
         }
-        digitalWrite(ledPin[pinNum], ledState[pinNum]);
-        passedThresh = passedThresh + 200;
+        digitalWrite(ledPin[pinNum], ledState[pinNum]); // Write decided state to selected pin
+        passedThresh = passedThresh + 200; // Increase the threshold by 200 milliseconds
       }
       
     }
-    ledOn = !ledOn;
-    // Timeout to avoid high speeds
+    ledOn = true; // Used to tell whether program has been run
+    Serial.printIn("PERSON DETECTED") // Serial confirmation for debugging
+    /*
+     * ADD A 'HIDE' MODE AFTER CERTAIN AMOUNT OF BLINKING
+     *   > DONE WITH COUNTER INSIDE FOR-LOOP
+     *   > RESET COUNTER EACH TIME
+     */
   }
   
 // Slow pulse/breathing
   if (micValue > micThresh) {
-    if (ledOn == true) {
-      for (int o = 0; 0 < ledCount; o++) { //
+    if (ledOn == true) { // Detect if Aggressive Blinking program has run
+      for (int o = 0; 0 < ledCount; o++) { // Turn off all LEDs for fresh start
       digitalWrite(ledPin[o], LOW);
       }
-    } 
+    }
+
+    
+     
     // Group LEDs possibly
     analogWrite(ledPin[x], brightness); // Add array numbers when known
     // Continue analogWrite for applicable amount
