@@ -1,100 +1,167 @@
-// Software for the Will-o-Wisp concept.
-// Created in collaboration with Digital Experience & Aesthetics.
+// Code for the Will-o-Wisp project, created in colaboration with BDEA at ITU-CPH
+// This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. 
+// https://creativecommons.org/licenses/by-nc-nd/4.0/
+// Code created by Nicholas Krasuski
 
-// Values used for output/LED addressing
 int ledPin[15] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 44, 45, 46}; // Add PWM pins
-int ledState[15] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW}; // Reserved led state
 int ledFade[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // List of fade values
 int ledCount = 15; // The amount of LEDs
-int ledOn = false;
+int litLed = random(0,15); // Initial position in array
+int change = 0; // Reserved for later use
 
-// Microphone/input values
-int micPin = A0; // Pin used for analog microphone input
-int micThresh = 990; // Microphone threshold level
+int micThresh = 967; // Microphone threshold level
 
-void setup() {
-  // Setup for led pins
-  for (int i=0; i < ledCount; i++) {
-    pinMode(ledPin[i], OUTPUT); // Sets each pin in array to output mode
+void setup() { // Code here runs once on boot
+  for (int i = 0; i < ledCount; i++) { // Set all used pins to output mode
+    pinMode(ledPin[i], OUTPUT);
   }
-  // Setup for microphone
-  pinMode(micPin, INPUT);
-  Serial.begin(9600);  
+  pinMode(A0, INPUT); // Set input mode on microphone pin
+  Serial.begin(9600); // Initiate serial for debugging purposes
 }
 
-
-void loop() {
-  int micValue = analogRead(micPin); //Read the analog value from the microphone
-  Serial.print(micValue);
-  Serial.print(" ");
-  anxious(micValue);
-  //delay(200);
-// Aggressive blinking
-  
-// Slow pulse/breathing
-  if (micValue > micThresh) {
-    int passedTime = millis();
-    int passedThresh = 300;
-    if (ledOn == true) { // Detect if Aggressive Blinking program has run
-      for (int o = 0; 0 < ledCount; o++) { // Turn off all LEDs for fresh start
-      digitalWrite(ledPin[o], LOW);
-      ledFade[o] = 0;
+void loop() { // Code here will run continously
+  int n = random(0,4); // Generate a random number from 0-3 - decides the outcome of current iteration
+  int micLevel = analogRead(A0); // Read microphone data every iteration from pin
+  int lastPin = litLed; // Set the last used pin to the current pin of previous iteration
+  if (n == 0 && micLevel > micThresh) { // -2 spots in the array
+    if (n == 0 && litLed == 0) { // Specifies the array placement due to different math
+      litLed = 13; 
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // For loop to create the fade effect
+          analogWrite(ledPin[litLed], fade); // Write fade value to the designated pin in array
+          delay(10); // Make number higher/lower to increase/decrease fade time
+        }
+        ledFade[litLed] = 255; // Set the fade value in array to 255 for litLed
+      }
+    }  
+    else if (n == 0 && litLed == 1) { // Specifies the array placement due to different math
+      litLed = 14;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
+        }
+        ledFade[litLed] = 255;
       }
     }
-    for (int q = 0; q < 100000; q++) { // For-loop to increase/decrease fade amount on LEDs
-      int pinNum = random(0,15); // Choose a random pin
-      if (passedTime == passedThresh) {
-        if (ledFade[pinNum] == 0) { // if-statement to increase brightness level
-          for (int fade = 0; fade <= 255; fade += 5) {
-            analogWrite(ledPin[pinNum],fade);
-            if (fade == 255) {
-              ledFade[pinNum] = fade;
-            }
-          delay(30); // Delay to visualize the fade effect
-          }
+    else { // none of the above is true then...
+      change = 2; // Number used to generate a new position in the array
+      litLed = litLed - change;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
         }
-        if (ledFade[pinNum] > 0) { // if-statement to decrease brightness level
-          for (int fade = 255; fade >= 0; fade -= 5) {
-            analogWrite(ledPin[pinNum], fade);
-            if (fade == 0) {
-              ledFade[pinNum] = fade;
-            }
-            delay(30); // Delay to visualize the fade effect
-          }
-        }
-        passedThresh = passedThresh + 300;  
+        ledFade[litLed] = 255;
       }
     }
-    //Serial.print("BREATHING");
   }
-}
-
-void anxious(micValue) {
-  if (micValue  < micThresh) {
-    int passedTime = millis(); // Start a millisecond timer to slow down sequence a bit
-    int passedThresh = 200; // Initial threshold for time passed
-    for (int p = 0; p < 50000; p++) { // For loop to randomize the LED thingies
-      int pinNum = random(0,15);
-      if (passedTime == passedThresh) { // Check if threshold milliseconds has been reached
-        if (ledState[pinNum] == HIGH) { // Detect prior state in order to reverse
-          ledState[pinNum] = LOW;
-          Serial.print("OFF");
+  else if (n == 1 && micLevel > micThresh) { // -1 spot in the array
+    if (n == 1 && litLed == 0) { // Specifies the array placement due to different math
+      litLed = 14;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
         }
-        else {
-          ledState[pinNum] = HIGH;
-          Serial.print("ON");
-        }
-        digitalWrite(ledPin[pinNum], ledState[pinNum]); // Write decided state to selected pin
-        passedThresh = passedThresh + 200; // Increase the threshold by 200 milliseconds
+        ledFade[litLed] = 255;
       }
     }
-    ledOn = true; // Used to tell whether program has been run
-    //Serial.print("PERSON DETECTED!"); // Serial confirmation for debugging
-    if (passedTime == 20000) { // 'hide' mode
-      for (int l = 0; l < ledCount; l++) {
-        digitalWrite(ledPin[l], LOW); // turn off all LED's
+    else { // None of the above is true then...
+      change = 1;
+      litLed = litLed - change;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
+        }
+        ledFade[litLed] = 255;
       }
-      Serial.print("OH NO I'M SCARED!"); // Serial confirmation for debugging
     }
+  }
+  else if (n == 2 && micLevel > micThresh) { // +1 spot in the array
+    if (n == 2 && litLed == 14) { // Specifies the array placement due to different math
+      litLed = 0;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
+        }
+        ledFade[litLed] = 255;
+      }
+    }
+    else { // None of the above is true then...
+      change = 1;
+      litLed = litLed + change;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
+        }
+        ledFade[litLed] = 255;
+      }
+    }
+  }
+  else if (n == 3 && micLevel > micThresh) { // +2 spots in the array
+    if (n == 3 && litLed == 14) { // Specifies the array placement due to different math
+      litLed = 1;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
+        }
+        ledFade[litLed] = 255;
+      }
+    }
+    else if (n == 3 && litLed == 13) { // Specifies the array placement due to different math
+      litLed = 0;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
+        }
+        ledFade[litLed] = 255;
+      }
+    }
+    else { // None of the above is true then...
+      change = 2;
+      litLed = litLed + change;
+      if (ledFade[litLed] < 255) {
+        for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+          analogWrite(ledPin[litLed], fade);
+          delay(10);
+        }
+        ledFade[litLed] = 255;
+      }
+    }
+  }
+  else if (micLevel > micThresh) { // None of the above is true then...
+    litLed = litLed + change;
+    if (ledFade[litLed] < 255) {
+      for (int fade = 0; fade <= 255; fade += 5) { // Fade loop
+        analogWrite(ledPin[litLed], fade);
+        delay(10);
+      }
+      ledFade[litLed] = 255;
+    }
+  }
+  delay(100); // Waits for the specified amount of milliseconds
+  for (int o = 255; o >= 0; o -= 5) { // Fade the previous pin from on to off
+    analogWrite(ledPin[lastPin], o);
+    delay(10);
+  }
+  ledFade[lastPin] = 0; // Set the fade value in array to 0 for previous pin
+  if (micLevel <= micThresh) { // Check if audio level has broken threshold
+    for (int i = 0; i < ledCount; i++) { // Flash all LEDs on
+      digitalWrite(ledPin[i], HIGH);
+    }
+    delay(300); // leave them on for this amount of ms
+    for (int i = 0; i < ledCount; i++) { // Turn all LEDs off
+      digitalWrite(ledPin[i], LOW);
+    }
+    delay(5000); // Amount of time to wait until running new iteration
+  }
+  else {
+    delay(100); // Amount of time to wait until running new iteration
   }
 }
